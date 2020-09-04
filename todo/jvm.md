@@ -8,12 +8,17 @@ JVM中内存划分
 3. 本地方法栈
 ### 线程共享 
 1. **堆区**
-        	![](https://files.catbox.moe/gfelg1.png)
+![](https://files.catbox.moe/gfelg1.png)
 	- 新生代
 	- Servior01
 	- Servior02
 	- 老年代
 2. **非堆区**
+	1. 虚拟机栈
+	2. 本地方法栈
+	3. 本地直接内存
+		1. 元空间
+
 3. **本地内存**
 	- 元空间(原来的方法区)
 
