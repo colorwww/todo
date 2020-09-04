@@ -1,4 +1,6 @@
 JVM中内存划分
+![](https://files.catbox.moe/wi9kr1.png)
+![](https://files.catbox.moe/qq019n.png)
 
 ### 线程独有的
 1. 程序计数器
