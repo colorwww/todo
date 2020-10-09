@@ -20,9 +20,19 @@ Beans和Context是实现IOC和依赖注入的基础，AOP实现切面编程。
 - Spring的AOP理解？
 > 首先aop包含以下几个概念
  1. 目标对象 Target Object :需要被代理的对象Target
- 2. 切面(Aspect)：切面规则，
+ 2. 切面(Aspect)：切面规则，（在Spring有@Aspect注解的类才会被进行AOP代理，切面包括切点和通知）
  3. 切点(Point Cut)：需要代理的某一个具体方法
- 4. 通知(Advice)：代理对象执行规则、业务的方法
+- 切入点表达式常用格式举例如下：
+~~~
+1.com.wmx.aspect.EmpService.*(..))：表示 com.wmx.aspect.EmpService 类中的任意方法
+2.com.wmx.aspect.*.*(..))：表示 com.wmx.aspect 包(不含子包)下任意类中的任意方法
+3.com.wmx.aspect..*.*(..))：表示 com.wmx.aspect 包及其子包下任意类中的任意方法
+~~~
+ 4. 通知(Advice)：代理对象执行规则、业务的方法(有5种增强通知，1. 前置通知@Before
+2. 后置通知@After
+3. 环绕通知@Around
+4. 返回通知@AfterReturning
+5. 异常通知@AfterThrowing)
 
 
 
@@ -59,12 +69,15 @@ Beans和Context是实现IOC和依赖注入的基础，AOP实现切面编程。
 
 **AOP是如何应用到Spring的声明周期中的：**
 ~~~
-1.@EnableAspectJAutoPropxy会向容器中注册一个AnnotationAwareAspectJAutoProxyCreator的BeanDefinition，
+1.@EnableAspectJAutoPropxy会向容器中注册一个AnnotationAwareAspectJAutoProxyCreator的Bean
+Definition，
 它本身也是一个BeanPostProcessor，它会在registerBeanPostProcessors方法中完成创建
 2.在registerBeanPostProcessors中完成creator的创建。
 3.执行后置处理器的PostProcessorBeforeInstantiation，
-筛选出不需要进行代理的Bean例如AOP中的基础类，提前做好标记
+筛选出不需要进行代理的Bean例如AOP中的基础类，提前做好标记(1.Advice,Advisor,Pointcut类型的Bean不需要被代理,2.没有对应的通知需要被应用到这个Bean上的话
+//  这个Bean也是不需要被代理的)
 4.AOP代理的真正创建时机，postProcessorAfterInstantiation，对需要进行代理的Bean完成AOP代理的创建
+（代码中判断如果已经完成代理或者在adviseBeansMap中标记当前bean不需要代理 、或没有对应的通知需要被应用到这个Bean上，则不进行代理，直接返回当前Bean）
 ~~~
 ![](https://cdn.jsdelivr.net/gh/colorwww/pictures/pictures/1602208704114-1602208704108-%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20201009095808.png)**
 
