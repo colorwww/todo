@@ -57,6 +57,18 @@ Beans和Context是实现IOC和依赖注入的基础，AOP实现切面编程。
 4. 返回通知@AfterReturning
 5. 异常通知@AfterThrowing
 
+**AOP是如何应用到Spring的声明周期中的：**
+~~~
+1.@EnableAspectJAutoPropxy会向容器中注册一个AnnotationAwareAspectJAutoProxyCreator的BeanDefinition，
+它本身也是一个BeanPostProcessor，它会在registerBeanPostProcessors方法中完成创建
+2.在registerBeanPostProcessors中完成creator的创建。
+3.执行后置处理器的PostProcessorBeforeInstantiation，
+筛选出不需要进行代理的Bean例如AOP中的基础类，提前做好标记
+4.AOP代理的真正创建时机，postProcessorAfterInstantiation，对需要进行代理的Bean完成AOP代理的创建
+~~~
+![](https://cdn.jsdelivr.net/gh/colorwww/pictures/pictures/1602208704114-1602208704108-%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20201009095808.png)**
+
+
 
 - Spring AOP 代理是什么？
 
@@ -70,4 +82,12 @@ Beans和Context是实现IOC和依赖注入的基础，AOP实现切面编程。
 - 织入（Weaving）是什么？
 ### 容器IOC
 ### Spring生命周期
+> 一个Bean的声明周期需要经过3个阶段，实例化，属性注入，初始化，在实例化和初始化前后，又有不同的后置处理器穿插执行，在Bean使用完毕后，又会被销毁
+
+**扫描初始化配置**：BeanFactoryPostProcessor执行，以spring中的为例，在扫描路径下的class后，创建对应的bd，放入到bdmap中，再对map遍历，找到被@Configuration注解的类，进行配置类的生命周期
+**实例化**：实现了InstantiationAwareBeanPostProcessor接口的Bean会在这个阶段执行
+**属性注入**：注入BeanFactory，BeanNameAware#setName()设置了Bean的名称
+**初始化**：实现了BeanPostProcessor接口的bean会在这个阶段执行
+
+	初始化阶段有3个部分会执行，分别是@PostConstract，实现了InitializingBean会执行afterPropertiesSet，init-method
 ### Spring初始化过程
