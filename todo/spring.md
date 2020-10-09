@@ -28,11 +28,15 @@ Beans和Context是实现IOC和依赖注入的基础，AOP实现切面编程。
 2.com.wmx.aspect.*.*(..))：表示 com.wmx.aspect 包(不含子包)下任意类中的任意方法
 3.com.wmx.aspect..*.*(..))：表示 com.wmx.aspect 包及其子包下任意类中的任意方法
 ~~~
- 4. 通知(Advice)：代理对象执行规则、业务的方法(有5种增强通知，1. 前置通知@Before
+ 4. 通知(Advice)：代理对象执行规则、业务的方法
+~~~
+有5种增强通知
+1. 前置通知@Before
 2. 后置通知@After
 3. 环绕通知@Around
 4. 返回通知@AfterReturning
 5. 异常通知@AfterThrowing)
+~~~
 
 
 
@@ -79,7 +83,11 @@ Definition，
 4.AOP代理的真正创建时机，postProcessorAfterInstantiation，对需要进行代理的Bean完成AOP代理的创建
 （代码中判断如果已经完成代理或者在adviseBeansMap中标记当前bean不需要代理 、或没有对应的通知需要被应用到这个Bean上，则不进行代理，直接返回当前Bean）
 ~~~
-![](https://cdn.jsdelivr.net/gh/colorwww/pictures/pictures/1602208704114-1602208704108-%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20201009095808.png)**
+
+**Spring如何解析出来AOP的通知**
+1.获取当前所有的通知 （构建的逻辑就是解析@Aspect注解所标注的类中的方法，通过当前的BeanFactory来获取对应的List<Advisor>）
+2.根据前面找出来的Advisor集合进行遍历，然后根据每个Advisor对应的切点来进行匹配，如何合适就返回
+![](https://cdn.jsdelivr.net/gh/colorwww/pictures/pictures/1602208704114-1602208704108-%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20201009095808.png)
 
 
 
