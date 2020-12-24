@@ -106,6 +106,7 @@ Definition，
 > 概括：一个Bean的声明周期需要经过3个阶段，实例化，属性注入，初始化，在实例化和初始化前后，又有不同的后置处理器穿插执行，在Bean使用完毕后，又会被销毁
 
 Bean的生命周期只考虑实例化，属性注入，初始化这几部分，首先在Bean生命周期开始之前会调用InstantiationAwareBeanPostProcessor中的postProcessorBeforeInstantiation，执行初始化前的后置处理器，(如果aop中设置了TargetObject的话会在这里返回一个代理Bean)，该处理器执行完返回的Bean不为空的话，会直接返回Bean，结束Bean的生命周期(配置了TargetObject的aop就是这样)，否则就会开始实例化，实例化有4中情形 
+
 一：Spring在5.0版本后加入了一个instanceSupplier属性，是jdk1.8中的lambda表达式，如果配置了该属性，会通过Supplier返回实例化对象，
 二：是否配置过工厂方法，此处如果配置了Factory-methods的话只是一个静态工厂，如果有factory-methods的话是一个实例工厂，通过工厂及指定的方法返回实例 
 三：是否有指定特定的构造器，有的话使用指定构造器返回实例，
@@ -113,6 +114,7 @@ Bean的生命周期只考虑实例化，属性注入，初始化这几部分，�
 
 实例化之后，属性注入前会合并当前Bean与父级Bean，(合并父级中额外的属性到子Bean中)，还会判断是否要缓存当前的实例，用于解决后面属性注入时循环依赖的问题。
 后面会在属性注入的方法内执行postProcessorAfterInstantiation
+
 `属性注入`
 属性注入部分要重点关注一个类AbstractAnnotationBeanPostProcessor ,该类继承自InstantiationAwareBeanPostProcessor，重写了处理属性值的方法，在这里它会去BeanMap中获取Bean依赖的属性，如果不存在，会进行该依赖的Bean的生命周期(此处是一个递归)，
 
