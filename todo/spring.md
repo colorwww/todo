@@ -108,7 +108,7 @@ Definition，
 Bean的生命周期只考虑实例化，属性注入，初始化这几部分，首先在Bean生命周期开始之前会调用InstantiationAwareBeanPostProcessor中的postProcessorBeforeInstantiation，执行初始化前的后置处理器，(如果aop中设置了TargetObject的话会在这里返回一个代理Bean)，该处理器执行完返回的Bean不为空的话，会直接返回Bean，结束Bean的生命周期(配置了TargetObject的aop就是这样)，否则就会开始实例化，实例化有4中情形 
 
 一：Spring在5.0版本后加入了一个instanceSupplier属性，是jdk1.8中的lambda表达式，如果配置了该属性，会通过Supplier返回实例化对象，
-二：是否配置过工厂方法，此处如果配置了Factory-methods的话只是一个静态工厂，如果有factory-methods的话是一个实例工厂，通过工厂及指定的方法返回实例 
+二：是否配置过工厂方法，此处如果配置了Factory-methods的话只是一个静态工厂，如果有factory-methods的话是一个实例工厂，通过工厂及指定的方法返回实例
 三：是否有指定特定的构造器，有的话使用指定构造器返回实例，
 四：走到最后的话就是使用默认构造器来实例化，当然会判断是否有配置过lookup-methods或replace-methods，(这两个方法一般是在原型模式下，用来指定具体的Bean)如果有的话会通过CGLib来返回代理过方法后的对象实例，否则使用默认构造器反射创建实例
 
@@ -127,12 +127,42 @@ Bean的生命周期只考虑实例化，属性注入，初始化这几部分，�
 
 
 > 1. BeanFactory 和 FactoryBean 的区别
+```text
+首先BeanFactory和FactoryBean两者都是Spring中的类
+不同之处在于BeanFactory是一个Bean工厂的顶级接口，声明了一些获取Bean的方法，而FactoryBean是一个Bean类型的顶级接口，在实例化前会检查扫描到的类是否是一个子类如果是的话，就会直接通过getObject方法来返回对应的Bean，并注入到Spring容器中
+```
 > 2. FactoryBean返回的实例在哪一阶段执行
+```text
+在实例化前，或通过判断当前要注入的Bean class是否是FactoryBean 的子类来确认是否是一个FactoryBean。
+```
 > 3. 循环依赖是如何解决的
+```text
+https://www.liuchengtu.com/lct/?folderId=49819#Xe8508cc1f43ea43d6ba815c2e905aa86
+```
 > 4. 讲一讲有哪些后置处理器，分别在什么时候用到，分别起到什么作用
+```text
+1.在实例化的前后会执行InstantiationAwareBeanPostProcessor，它有三个方法，分别是用来对实例化前的Bean进行操作（如果设置了AOP切面，并且指定了TargetObject属性，会在这里直接返回代理后的Bean，并结束当前Bean的生命周期），对实例化后的Bean进行操作，对实例化后的Bean的属性进行操作(为后面的属性注入做准备)
+
+2.在初始化开始会执行3个Aware接口，功能分别是修改BeanName，classLoader，BeanFactory
+3.在初始化的前后会执行InitializationBeanPostProcessor，分别对应的是初始化前对Bean的操作，初始化后对Bean的操作，其中如果设置了AOP，会在初始化后的AOP后置处理器将对象转化为代理对象。
+4.在执行初始化方法的时候，会回调InitializingBean接口的afterPropertiesSet方法，用于自定义初始化操作
+```
 > 5. 在最后初始化的时候，针对AOP，如何判断是用Jdk 还是 CGLib动态代理，讲一下jkd动态代理，CGLib动态代理？
+```
+如果实现的父类是接口，用jdk动态代理，否则用CGLib
+```
 > 6. lambda 表达式很熟悉嘛？来讲讲 Supplier
+```
+Supplier
+```
 > 7. 属性注入的不同方法，通过set注入通过构造器注入。。。？
+```
+属性注入是通过在之前会执行一个后置处理器，这个处理器拿到要属性注入的Bean对应的class，再通过反射遍历所有Field和Method，将带有@Autowired，@Value等注解的属性或方法生成对应的不同注入方法，再进行注入的时候可以直接调用对应的注入方法就可以
+```
+> 8.为什么aop在实例化之前会将带有TargetObject属性的Bean代理，而剩下的在初始化之后才返回代理
+```
+如果有TargetObject的话就没必要进行后面的实例化了，直接拿当前的TargetObject返回代理就可以
+```
 -   这个要分Spring和SpringBoot项目：
 1. Spring项目中：首先需要通过
 
